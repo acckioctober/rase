@@ -1,0 +1,59 @@
+{% extends 'layouts/base.html' %}
+{% load widget_tweaks %}
+{% load static %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2 class="mb-4">Регистрация на мероприятие</h2>
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+
+        <!-- Отображение ошибок на уровне всей формы -->
+        {% if form.non_field_errors %}
+            <div class="alert alert-danger">
+                {% for error in form.non_field_errors %}
+                    {{ error }}
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        <!-- Ручной рендеринг полей формы -->
+        {% for field in form %}
+            <div class="mb-3">
+                <label for="{{ field.id_for_label }}" class="form-label">{{ field.label }}</label>
+                {% if field.field.widget.input_type == 'select' %}
+                    {{ field|add_class:'form-select' }}
+                {% elif field.field.widget.input_type == 'checkbox' %}
+                    <div class="form-check">
+                        {{ field|add_class:'form-check-input' }}
+                        <label class="form-check-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
+                    </div>
+                {% else %}
+                    {{ field|add_class:'form-control' }}
+                {% endif %}
+                {% if field.help_text %}
+                    <small class="form-text text-muted">{{ field.help_text }}</small>
+                {% endif %}
+                {% if field.errors %}
+                    {% for error in field.errors %}
+                        <div class="invalid-feedback d-block">{{ error }}</div>
+                    {% endfor %}
+                {% endif %}
+            </div>
+        {% endfor %}
+
+        <!-- Дополнительный чекбокс (если требуется) -->
+        <div class="mb-3 form-check">
+            <input type="checkbox" class="form-check-input" id="customCheck1">
+            <label class="form-check-label" for="customCheck1">Согласие на обработку персональных данных</label>
+        </div>
+
+        <!-- Кнопка отправки -->
+        <button type="submit" class="btn btn-primary">Зарегистрироваться</button>
+    </form>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script type="text/javascript" src="{% static 'race/js/event_register.js' %}"></script>
+{% endblock extra_js %}

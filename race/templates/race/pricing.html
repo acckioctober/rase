@@ -1,0 +1,44 @@
+{% extends 'layouts/base.html' %}
+
+{% block content %}
+<div class="container my-4">
+    <h1 class="mb-4 text-center">Информация о стоимости участия</h1>
+    {% for event in upcoming_events %}
+        <div class="card mb-3">
+            <div class="card-header">
+                <h2>{{ event.title }} - {{ event.date|date:"d F Y г." }} в {{ event.time|date:"H:i" }}</h2>
+            </div>
+            <div class="card-body">
+                <p>{{ event.description }}</p>
+                <h3>Типы забегов:</h3>
+                <ul class="list-group list-group-flush">
+                    {% for race_type in event.race_types.all %}
+                        <li class="list-group-item">
+                            {{ race_type.distance }} км {{ race_type.get_gender_display }} -
+                            {{ race_type.min_age }} лет и старше
+                            (взнос {{ race_type.registration_fee }} руб.)
+                        </li>
+                    {% empty %}
+                        <li class="list-group-item">Информация о типах забегов для этого мероприятия отсутствует.</li>
+                    {% endfor %}
+                </ul>
+            </div>
+            <div class="card-footer">
+                <h3>Организаторы:</h3>
+                <ul>
+                    {% for organizer in event.organizers.all %}
+                        <li>
+                            {{ organizer.user.get_full_name }} - {{ organizer.contact }}
+                            <br>Реквизиты для оплаты: {{ organizer.payment_details }}
+                        </li>
+                    {% empty %}
+                        <li>Организаторы для этого мероприятия отсутствуют.</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+    {% empty %}
+        <p class="text-center">Предстоящие мероприятия отсутствуют.</p>
+    {% endfor %}
+</div>
+{% endblock %}

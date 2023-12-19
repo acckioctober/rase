@@ -1,0 +1,27 @@
+{% extends 'layouts/base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <!-- Панель навигации пользователя -->
+        <div class="col-md-4">
+            <!-- Ссылки меню -->
+            <div class="list-group">
+                <a href="{% url 'users:registrations_list' %}" class="list-group-item list-group-item-action">Личные регистрации</a>
+                <a href="{% url 'users:profile' %}" class="list-group-item list-group-item-action">Редактировать профиль</a>
+                <a href="{% url 'users:password_change' %}" class="list-group-item list-group-item-action">Изменить пароль</a>
+                <a href="#" class="list-group-item list-group-item-action">Обратная Связь / Поддержка</a> <!-- Заглушка -->
+                <a href="{% url 'users:logout' %}" class="list-group-item list-group-item-action text-danger">Выход</a>
+            </div>
+        </div>
+        <!-- Контентная область -->
+        <div class="col-md-8">
+            <h3>Добро пожаловать, {{ request.user.get_full_name|default:request.user.username }} !</h3>
+            {% block user_content %}
+            <!-- Сюда будет вставляться динамический контент -->
+            {% endblock user_content %}
+        </div>
+    </div>
+</div>
+{% endblock content %}

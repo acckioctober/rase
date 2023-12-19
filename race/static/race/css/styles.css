@@ -1,0 +1,48 @@
+/* Стили для центрирования navbar */
+.navbar {
+    justify-content: center; /* Центрирование содержимого навбара */
+    position: fixed;
+    top: 0;
+    width: 100%;
+    z-index: 1000; /* Убедитесь, что navbar находится над другими элементами */
+}
+
+.navbar-nav {
+    flex-direction: row; /* Элементы навбара располагаются в строку */
+    justify-content: center; /* Центрирование пунктов меню */
+}
+
+.navbar-collapse {
+    justify-content: center; /* Предотвращение растягивания navbar-collapse */
+}
+
+html, body {
+    height: 100%; /* Устанавливаем высоту для всей страницы */
+    margin: 0; /* Сбрасываем стандартные отступы */
+    padding: 0;
+    background-color: #e0e0e0; /* Серый фон для всей страницы */
+}
+
+.wrapper {
+    padding-top: 56px; /* Размер зависит от высоты вашего navbar */
+    min-height: 100%; /* Минимальная высота - 100% от страницы */
+    display: flex;
+    flex-direction: column; /* Колонка для правильного распределения содержимого */
+}
+
+.main-content {
+    overflow-y: auto; /* Добавление возможности прокрутки для контента */
+    flex-grow: 1; /* Растягиваем основной контент, чтобы занять доступное пространство */
+    padding-bottom: 60px; /* Отступ внизу, равный или больше высоты футера */
+}
+
+.footer {
+    height: 60px; /* Задаем фиксированную высоту для футера */
+    background-color: #007bff;
+    text-align: center;
+    padding: 10px;
+    position: relative;
+    margin-top: -60px; /* Смещение футера вверх на его высоту */
+    clear: both;
+    border-top: 1px solid #ddd;
+}

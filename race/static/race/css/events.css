@@ -1,0 +1,38 @@
+.container {
+    max-width: 1200px;
+    margin: auto;
+}
+
+.card {
+    display: flex;
+    align-items: stretch;
+    border: 1px solid #ddd;
+    background-color: #f9f9f9;
+    margin-bottom: 20px;
+}
+
+.card-img {
+    flex-shrink: 0;
+    padding-right: 20px;
+}
+
+.img-article-left {
+    width: 100%;
+    height: auto;
+    max-width: 200px; /* Ограничение ширины изображения */
+}
+
+.card-info {
+    flex-grow: 1;
+}
+
+.card-title {
+    font-size: 1.5rem;
+    color: #007bff;
+    margin-bottom: 10px;
+}
+
+.card-text {
+    font-size: 1rem;
+    margin-bottom: 5px;
+}

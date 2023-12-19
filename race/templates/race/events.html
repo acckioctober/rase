@@ -1,0 +1,55 @@
+{% extends 'layouts/base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+    <!-- Фильтры и сортировка -->
+    <div class="row mb-3">
+        <div class="col">
+            <form method="get" class="form-inline">
+                <select name="filter" class="form-select" onchange="this.form.submit()">
+                    <option value="all">Все мероприятия</option>
+                    <option value="upcoming" {% if filter == 'upcoming' %}selected{% endif %}>Предстоящие</option>
+                    <option value="past" {% if filter == 'past' %}selected{% endif %}>Прошедшие</option>
+                </select>
+            </form>
+        </div>
+    </div>
+
+    <!-- Список мероприятий -->
+    <div class="row justify-content-center">
+        {% for event in events %}
+        <div class="col-md-4 d-flex align-items-stretch mb-4">
+            <div class="card h-100">
+                <!-- Изображение мероприятия, если оно есть -->
+                {% if event.image %}
+                    <img src="{{ event.image.url }}" class="card-img-top" alt="{{ event.title }}" style="height: 400px; object-fit: cover;">
+                {% endif %}
+                <div class="card-body d-flex flex-column">
+                    <h5 class="card-title">{{ event.title }}</h5>
+                    <p class="card-text">{{ event.date|date:"d F Y г. (D)" }} {{ event.time }} - {{ event.location }} </p>
+                    <p class="card-text">{{ event.description|truncatewords:20 }}</p>
+                    <a href="{{ event.get_absolute_url }}" class="btn btn-primary mt-auto align-self-end">Подробнее</a>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+            <p>Мероприятия не найдены.</p>
+        {% endfor %}
+    </div>
+
+    <!-- Пагинация -->
+    <div class="row">
+        <div class="col d-flex justify-content-center mt-4">
+            <nav aria-label="Page navigation">
+                <ul class="pagination">
+                    {% for page_num in paginator.page_range %}
+                        <li class="page-item {% if page == page_num %}active{% endif %}">
+                            <a class="page-link" href="?page={{ page_num }}{% if filter %}&filter={{ filter }}{% endif %}">{{ page_num }}</a>
+                        </li>
+                    {% endfor %}
+                </ul>
+            </nav>
+        </div>
+    </div>
+</div>
+{% endblock %}

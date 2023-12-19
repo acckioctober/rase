@@ -1,0 +1,39 @@
+{% extends 'users/user_menu.html' %}
+{% load widget_tweaks %}
+
+{% block user_content %}
+<div class="container mt-4">
+    <h5>Детали регистрации</h5>
+    <div class="card mb-3">
+        <div class="card-body">
+            <p class="card-text"><strong>Статус регистрации:</strong> {{ registration.is_active|yesno:"Активна,Отменена" }}</p>
+            <h3 class="card-title">{{ registration.event.title }}</h3>
+            <p class="card-text"><strong>Дата забега:</strong> {{ registration.event.date|date:"d.m.Y" }}</p>
+            <p class="card-text"><strong>Время начала:</strong> {{ registration.event.time }}</p>
+            <p class="card-text"><strong>Место проведения:</strong> {{ registration.event.location }}</p>
+            <p class="card-text"><strong>Категория:</strong> {{ registration.race }}</p>
+            <p class="card-text"><strong>Статус оплаты:</strong> {{ registration.payment_confirmation|yesno:"Подтверждена,Не подтверждена" }}</p>
+            <p class="card-text"><strong>Размер футболки:</strong> {{ registration.tshirt_size }}</p>
+            <p class="card-text"><strong>Зарегистрировано:</strong> {{ registration.registered_at|date:"d.m.Y H:i" }}</p>
+            <a href="{{ registration.payment_document.url }}" download>Скачать документ об оплате</a>
+
+            <!-- Позиционирование кнопки в правом нижнем углу карточки -->
+            <div class="d-flex mt-4">
+                {% if registration.event.date > now %}
+                    <form action="{% url 'users:registration_toggle_status' registration.id %}" method="post">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-warning btn-sm">
+                            {% if registration.is_active %}
+                                Отменить регистрацию
+                            {% else %}
+                                Восстановить регистрацию
+                            {% endif %}
+                        </button>
+                    </form>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    <a href="{% url 'users:registrations_list' %}" class="btn btn-secondary">Вернуться к регистрациям</a>
+</div>
+{% endblock user_content %}

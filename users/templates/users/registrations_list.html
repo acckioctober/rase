@@ -1,0 +1,52 @@
+{% extends 'users/user_menu.html' %}
+{% load widget_tweaks %}
+
+{% block user_content %}
+<div class="container mt-4">
+    <h5 class="mb-4">Личные регистрации</h5>
+    <table class="table table-hover">
+        <thead>
+            <tr>
+                <th scope="col">Мероприятие</th>
+                <th scope="col">Дата</th>
+                <th scope="col">Статус регистрации</th>
+                <th scope="col">Статус оплаты</th>
+                <th scope="col"></th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- Предположим, что 'registrations' - это список регистраций пользователя -->
+            {% for registration in registrations %}
+            <tr>
+                <td>{{ registration.event.title }}</td>
+                <td>{{ registration.event.date|date:"d.m.Y" }}</td>
+                <td>{{ registration.is_active|yesno:"Активна,Отменена" }}</td>
+                <td>{{ registration.payment_confirmation|yesno:"Подтверждена,Не подтверждена" }}</td>
+                <td>
+                    <a href="{% url 'users:registration_detail' registration.id %}" class="btn btn-primary btn-sm">Подробнее</a>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="5">У вас пока нет регистраций на забеги.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <!-- Пагинация -->
+    <div class="row">
+        <div class="col d-flex justify-content-center mt-4">
+            <nav aria-label="Page navigation">
+                <ul class="pagination">
+                    {% for page_num in paginator.page_range %}
+                        <li class="page-item {% if page == page_num %}active{% endif %}">
+                            <a class="page-link" href="?page={{ page_num }}{% if filter %}&filter={{ filter }}{% endif %}">{{ page_num }}</a>
+                        </li>
+                    {% endfor %}
+                </ul>
+            </nav>
+        </div>
+    </div>
+</div>
+{% endblock user_content %}

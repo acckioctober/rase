@@ -1,0 +1,104 @@
+/* Container styling */
+.container {
+    max-width: 1200px; /* Limit the maximum width */
+    margin: auto; /* Center the container */
+    padding: 20px; /* Padding around the content */
+    border: 2px solid black;
+}
+
+/* Event title styling */
+.event-header h1 {
+    color: #007bff; /* Blue color for the title */
+    text-align: center; /* Center align the title */
+    margin-bottom: 20px; /* Space below the title */
+}
+
+/* Main event layout */
+.event-main {
+    display: flex; /* Flexbox for layout */
+    justify-content: space-between; /* Space between children */
+    margin-bottom: 20px; /* Space below the section */
+}
+
+/* Event information styling */
+.event-info {
+    flex-basis: 60%; /* Occupies 60% of the flex container */
+    padding: 15px; /* Padding inside the box */
+    background-color: #f9f9f9; /* Light gray background */
+    border-radius: 5px; /* Rounded corners */
+}
+
+/* Description paragraph styling */
+.description {
+    font-size: 1.2rem; /* Larger font size for readability */
+    margin-bottom: 10px; /* Space below paragraph */
+}
+
+/* Styling for slots and days left */
+.available-slots, .days-left {
+    font-weight: bold; /* Bold font for emphasis */
+    color: #007bff; /* Blue color for key info */
+}
+
+/* Image styling */
+.event-image {
+    flex-basis: 35%; /* Occupies 35% of the flex container */
+    text-align: center; /* Center align the image */
+}
+
+.event-image img {
+    max-width: 100%; /* Full width of the container */
+    height: auto; /* Maintain aspect ratio */
+    border-radius: 5px; /* Rounded corners for the image */
+}
+
+/* Map styling */
+#map {
+    width: 100%; /* Full width */
+    height: 400px; /* Fixed height */
+    margin-bottom: 20px; /* Space below the map */
+    border-radius: 5px; /* Rounded corners */
+}
+
+/* Styling for schedule and participant sections */
+.event-schedule, .event-participants, .event-groups {
+    background-color: #f9f9f9; /* Light gray background */
+    padding: 15px; /* Padding inside the box */
+    margin-bottom: 20px; /* Space below each section */
+    border-radius: 5px; /* Rounded corners */
+}
+
+/* Header styling within sections */
+.event-schedule h2, .event-participants h2, .event-groups h2 {
+    margin-bottom: 10px; /* Space below headers */
+}
+
+/* List styling in the schedule section */
+.event-schedule ul, .event-groups ul {
+    list-style-type: none; /* No bullet points */
+    padding: 0; /* No padding */
+}
+
+.event-schedule ul li, .event-groups ul li {
+    margin-bottom: 5px; /* Space between list items */
+}
+
+/* Button styling */
+.btn {
+    padding: 10px 20px; /* Padding around text */
+    border-radius: 5px; /* Rounded corners */
+    margin-right: 10px; /* Space to the right of the button */
+    color: white; /* Text color */
+    text-decoration: none; /* No underline */
+    text-align: center; /* Center text */
+}
+
+/* Specific button color styling */
+.btn-info { background-color: #17a2b8; }
+.btn-primary { background-color: #007bff; }
+.btn-secondary { background-color: #6c757d; }
+
+/* Button hover effects */
+.btn-info:hover, .btn-primary:hover, .btn-secondary:hover {
+    opacity: 0.8; /* Slightly transparent on hover */
+}

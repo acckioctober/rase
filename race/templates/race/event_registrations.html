@@ -1,0 +1,37 @@
+{% extends 'layouts/base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2 class="mb-4 text-center">Список участников мероприятия: {{ event.title }}</h2>
+
+    {% for race, registrations in grouped_registrations.items %}
+        <div class="mb-4">
+            <h5 class="mb-3">{{ race }}</h5>
+            <table class="table table-bordered table-hover">
+                <thead class="table-light">
+                    <tr>
+                        <th scope="col">#</th>
+                        <th scope="col">Фамилия, имя</th>
+                        <th scope="col">Город</th>
+                        <th scope="col">Клуб</th>
+                        <th scope="col">Год рождения</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for registration in registrations %}
+                    <tr>
+                        <th scope="row">{{ forloop.counter }}</th>
+                        <td>{{ registration.user.get_full_name }}</td>
+                        <td>{{ registration.city }}</td>
+                        <td>{{ registration.club }}</td>
+                        <td>{{ registration.date_of_birth|date:"Y" }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% empty %}
+        <p class="text-center">На данный момент нет зарегистрированных участников.</p>
+    {% endfor %}
+</div>
+{% endblock %}

@@ -1,0 +1,16 @@
+{% extends 'layouts/base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-12">
+            <h1 class="display-4 text-center">Добро пожаловать!</h1>
+            <p class="lead text-center">
+                Вы успешно зарегистрировались на сайте! Для входа в систему необходимо авторизоваться по
+                <a href="{% url 'users:login' %}">этой ссылке</a>.
+            </p>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
