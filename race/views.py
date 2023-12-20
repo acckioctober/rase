@@ -5,7 +5,7 @@ from django.views.generic import ListView, TemplateView, CreateView, DetailView
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views import View
 from django.utils import timezone
-from .models import Event, Location, RaceType, Organizer, GalleryImage, Review, EventRegistration
+from .models import Event, Location, RaceType, Organizer, GalleryPhoto, Review, EventRegistration
 from django.db.models import Prefetch
 from .forms import ReviewForm, EventRegistrationForm
 from django.core.paginator import Paginator
@@ -15,69 +15,82 @@ from django.http import JsonResponse
 def page_not_found(request, exception):
     return HttpResponseNotFound("<h1>Страница не найдена</h1>")
 
-def main_page_view(request):
-    current_date = timezone.now().date()
-    # Получение предстоящих и прошедших мероприятий
-    upcoming_events = Event.objects.filter(date__gte=current_date).order_by('-date')
-    past_events = Event.objects.filter(date__lt=current_date).order_by('-date')
 
-    # Получение последних 5 отзывов
-    latest_reviews = Review.objects.order_by('-created_at')[:5]
+class MainPageView(TemplateView):
+    """
+    The MainPageView class represents the view for the main page of the site. This view handles the display
+    of upcoming and past events, as well as the latest reviews.
+    """
+    template_name = 'race/main_page.html'
 
-    context = {
-        'events': upcoming_events,
-        'past_events': past_events,
-        'latest_reviews': latest_reviews,
-    }
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        current_datetime = timezone.now()
 
-    return render(request, 'race/main_page.html', context)
+        # Получение предстоящих и прошедших мероприятий
+        context['upcoming_events'] = Event.objects.filter(
+            start_datetime__gte=current_datetime).order_by('start_datetime')
+        context['past_events'] = Event.objects.filter(
+            start_datetime__lt=current_datetime).order_by('-start_datetime')
 
+        # Получение последних 5 отзывов
+        context['latest_reviews'] = Review.objects.order_by('-created_at')[:5]
 
-def add_review(request, pk):
-    event = Event.objects.get(id=pk)
-    if request.method == 'POST':
-        form = ReviewForm(request.POST)
-        if form.is_valid():
-            review = form.save(commit=False)
-            review.event = event
-            review.author = request.user
-            review.save()
-            return redirect('main_page')
-    else:
-        form = ReviewForm()
-
-    return render(request, 'race/add_review.html', {'form': form, 'event': event})
+        return context
 
 
-def events_view(request):
-    current_date = timezone.now().date()
-    filter_option = request.GET.get('filter', 'all')
+class EventsView(ListView):
+    """
+    The EventsView class is responsible for displaying a list of events on the 'race/events.html' page.
+    This class extends Django's ListView. It provides a list of events based on the filter
+    selected by the user (all, upcoming, or past events). Pagination is implemented to limit
+    the number of events displayed per page.
+    """
+    model = Event
+    template_name = 'race/events.html'
+    context_object_name = 'events'
+    paginate_by = 6  # Количество событий на странице
 
-    if filter_option == 'upcoming':
-        events = Event.objects.filter(date__gte=current_date).order_by('-date')
-    elif filter_option == 'past':
-        events = Event.objects.filter(date__lt=current_date).order_by('-date')
-    else:
-        events = Event.objects.all().order_by('-date')
+    def get_queryset(self):
+        current_datetime = timezone.now()
+        filter_option = self.request.GET.get('filter', 'all')
 
-    # Пагинация
-    paginator = Paginator(events, 6)  # Показывать 9 мероприятий на странице
-    page = request.GET.get('page')
-    events = paginator.get_page(page)
+        if filter_option == 'upcoming':
+            return Event.objects.filter(start_datetime__gte=current_datetime).order_by('start_datetime')
+        elif filter_option == 'past':
+            return Event.objects.filter(start_datetime__lt=current_datetime).order_by('-start_datetime')
+        else:
+            return Event.objects.all().order_by('-start_datetime')
 
-    return render(request, 'race/events.html', {'events': events, 'paginator': paginator, 'page': page, 'filter': filter_option})
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['filter'] = self.request.GET.get('filter', 'all')
+        return context
 
 
 class PricingView(View):
+    """
+    The PricingView class extends Django's View class and is used to render the 'race/pricing.html' page.
+    This view gathers data about upcoming events, including their associated race types and organizers,
+    and passes this information to the template for rendering.
+    """
     def get(self, request, *args, **kwargs):
-        upcoming_events = Event.objects.filter(date__gte=timezone.now()).prefetch_related(
+        upcoming_events = Event.objects.filter(start_datetime__gte=timezone.now()).prefetch_related(
             'race_types', 'organizers'
         )
         return render(request, 'race/pricing.html', {'upcoming_events': upcoming_events})
 
 
+class ContactView(TemplateView):
+    template_name = 'race/contact.html'
+
+
 class EventDetailView(DetailView):
-    """A view for display details of a specific event"""
+    """
+    The EventDetailView class provides a detailed view of an individual event.
+    It extends Django's DetailView class to render a specific event's details.
+    The view uses the 'race/detailed_event.html' template to display the information.
+    """
     model = Event
     template_name = 'race/detailed_event.html'
     context_object_name = 'event'
@@ -108,7 +121,7 @@ class EventRegistrationsView(DetailView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         event = self.object
-        registrations = EventRegistration.objects.filter(event=event).select_related('user', 'race').order_by('race')
+        registrations = EventRegistration.objects.filter(event=event, is_active=True).select_related('user', 'race').order_by('race')
 
         grouped_registrations = {}
         for registration in registrations:
@@ -163,3 +176,19 @@ class RaceRegistrationSuccessView(TemplateView):
         # Remove the flag from the session
         request.session.pop('registration_successful', None)
         return super().dispatch(request, *args, **kwargs)
+
+
+def add_review(request, pk):
+    event = Event.objects.get(id=pk)
+    if request.method == 'POST':
+        form = ReviewForm(request.POST)
+        if form.is_valid():
+            review = form.save(commit=False)
+            review.event = event
+            review.author = request.user
+            review.save()
+            return redirect('main_page')
+    else:
+        form = ReviewForm()
+
+    return render(request, 'race/add_review.html', {'form': form, 'event': event})

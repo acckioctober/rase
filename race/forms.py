@@ -15,7 +15,7 @@ class EventRegistrationForm(forms.ModelForm):
     """Event Registration Form with Dynamic Race Type Selection and Validation"""
     # Поле выбора мероприятия, отображает только предстоящие мероприятия
     event = forms.ModelChoiceField(
-        queryset=Event.objects.filter(date__gte=timezone.now()),
+        queryset=Event.objects.filter(start_datetime__gte=timezone.now()),
         widget=forms.Select(attrs={'class': 'form-control'}),
         label='Мероприятие'
     )
@@ -69,12 +69,12 @@ class EventRegistrationForm(forms.ModelForm):
         if 'event' in self.data:
             try:
                 event_id = int(self.data.get('event'))
-                event = Event.objects.get(id=event_id, date__gte=timezone.now())
+                event = Event.objects.get(id=event_id, start_datetime__gte=timezone.now())
                 self.fields['race'].queryset = event.race_types.all()
             except (ValueError, TypeError, Event.DoesNotExist):
                 self.fields['race'].queryset = RaceType.objects.none()
         elif self.instance.pk:
-            if self.instance.event.date >= timezone.now().date():
+            if self.instance.event.start_datetime >= timezone.now():
                 self.fields['race'].queryset = self.instance.event.race_types.all()
             else:
                 self.fields['race'].queryset = RaceType.objects.none()
@@ -85,23 +85,10 @@ class EventRegistrationForm(forms.ModelForm):
         race = cleaned_data.get("race")
         user = self.initial.get("user")
 
-        if event and event.date < timezone.now().date():
+        if event and event.start_datetime < timezone.now():
             raise forms.ValidationError("Регистрация на выбранное мероприятие уже истекла.")
 
         if EventRegistration.objects.filter(user=user, event=event, race=race).exists():
             raise forms.ValidationError("Вы уже зарегистрированы на это мероприятие в данной группе.")
 
         return cleaned_data
-
-
-
-
-
-
-
-
-
-
-
-
-

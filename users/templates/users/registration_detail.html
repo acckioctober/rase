@@ -19,7 +19,7 @@
 
             <!-- Позиционирование кнопки в правом нижнем углу карточки -->
             <div class="d-flex mt-4">
-                {% if registration.event.date > now %}
+                {% if registration.event.start_datetime >= now %}
                     <form action="{% url 'users:registration_toggle_status' registration.id %}" method="post">
                         {% csrf_token %}
                         <button type="submit" class="btn btn-warning btn-sm">

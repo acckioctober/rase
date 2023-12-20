@@ -30,8 +30,8 @@
                 </div>
                 <div class="col-md-6">
                     <h3>Детали</h3>
-                    <p><strong>Дата:</strong> {{ event.date|date:"d F Y г. (D)" }}</p>
-                    <p><strong>Время:</strong> {{ event.time }} </p>
+                    <p><strong>Дата:</strong> {{ event.start_datetime|date:"d F Y г. (D)" }}</p>
+                    <p><strong>Время:</strong> {{ event.start_datetime|time }} </p>
                     {% if event.days_left > 0 %}
                         <p class="days-left"><strong>Дней до мероприятия:</strong> {{ event.days_left }}</p>
                     {% endif %}

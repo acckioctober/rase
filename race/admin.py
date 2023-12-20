@@ -5,7 +5,8 @@ from .models import (RaceType,
                      Event,
                      EventSchedule,
                      Organizer,
-                     GalleryImage,
+                     EventSummary,
+                     GalleryPhoto,
                      Review)
 from django.utils.html import format_html
 
@@ -19,7 +20,8 @@ class RaceTypeAdmin(admin.ModelAdmin):
 
 class EventRegistrationAdmin(admin.ModelAdmin):
     """Class for displaying the EventRegistration model in the admin panel"""
-    list_display = ['user', 'event', 'race', 'date_of_birth', 'city', 'club', 'tshirt_size', 'payment_document_link', 'payment_confirmation', 'registered_at', 'is_active']
+    list_display = ['user', 'event', 'race', 'date_of_birth', 'city', 'club', 'tshirt_size',
+                    'payment_document_link', 'payment_confirmation', 'registered_at', 'is_active']
 
     def payment_document_link(self, obj):
         if obj.payment_document:
@@ -53,5 +55,6 @@ admin.site.register(Location)
 admin.site.register(Event, EventAdmin)
 admin.site.register(EventSchedule)
 admin.site.register(Organizer)
-admin.site.register(GalleryImage)
+admin.site.register(EventSummary)
+admin.site.register(GalleryPhoto)
 admin.site.register(Review)

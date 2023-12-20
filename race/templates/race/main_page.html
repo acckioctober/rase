@@ -65,7 +65,7 @@
         <div class="container">
             <h2 class="text-center mb-4">Предстоящие мероприятия</h2>
             <div class="row justify-content-center d-flex">
-                {% for event in events %}
+                {% for event in upcoming_events %}
                     <div class="col-md-4 mb-3">
                         <div class="card h-100"> <!-- Добавьте класс h-100 для выравнивания карточек по высоте -->
                             {% if event.image %}
@@ -73,7 +73,7 @@
                             {% endif %}
                             <div class="card-body d-flex flex-column"> <!-- Flexbox для управления позиционированием внутри карточки -->
                                 <h5 class="card-title">{{ event.title }}</h5>
-                                <p class="card-text">{{ event.date|date:"d F Y г. (D)" }} {{ event.time }} - {{ event.location }} </p>
+                                <p class="card-text">{{ event.start_datetime|date:"d F Y г. (D)" }} {{ event.start_datetime|time }} - {{ event.location }} </p>
                                 <p class="card-text">Свободных мест: {{ event.get_free_slots }} из {{ event.total_slots }} </p>
                                 <p class="card-text">{{ event.description|truncatewords:20 }} </p>
                                 <a href="{{ event.get_absolute_url }}" class="btn btn-primary mt-auto align-self-end">Подробнее</a> <!-- Измененные классы для кнопки -->
@@ -123,81 +123,70 @@
 
     <!-- Галерея прошедших мероприятий -->
     <section class="past-events py-5 bg-light">
-    <div class="container">
-        <h2 class="text-center mb-4">Галерея прошедших мероприятий</h2>
-        <div class="row">
-            {% for event in past_events|slice:":3" %}
-                <div class="col-md-4 mb-3">
-                    <div class="card h-100">
-                        <!-- Карусель изображений -->
-                        <div id="carousel{{ event.id }}" class="carousel slide" data-bs-ride="carousel">
-                            <div class="carousel-indicators">
-                                {% for image in event.images.all %}
-                                    <button type="button" data-bs-target="#carousel{{ event.id }}" data-bs-slide-to="{{ forloop.counter0 }}" {% if forloop.first %}class="active" aria-current="true"{% else %}aria-current="false"{% endif %} aria-label="Slide {{ forloop.counter }}"></button>
-                                {% endfor %}
-                            </div>
-                            <div class="carousel-inner">
-                                {% for image in event.images.all %}
-                                    <div class="carousel-item {% if forloop.first %}active{% endif %}">
-                                        <img src="{{ image.image.url }}" class="d-block w-100 card-img-top" alt="{{ image.title }}">
-                                        <div class="carousel-caption d-none d-md-block">
-                                            <h5>{{ image.title }}</h5>
-                                        </div>
+        <div class="container">
+            <h2 class="text-center mb-4">Галерея прошедших мероприятий</h2>
+            <div class="row">
+                {% for event in past_events|slice:":3" %}
+                    <div class="col-md-4 mb-3">
+                        <div class="card h-100">
+                            {% if event.photos.exists %}
+                                <!-- Карусель фотографий -->
+                                <div id="carousel{{ event.id }}" class="carousel slide" data-bs-ride="carousel">
+                                    <!-- Определение индикаторов -->
+                                    <div class="carousel-indicators">
+                                        {% for image in event.photos.all %}
+                                        <button type="button" data-bs-target="#carousel{{ event.id }}" data-bs-slide-to="{{ forloop.counter0 }}" {% if forloop.first %}class="active" aria-current="true"{% endif %} aria-label="Slide {{ forloop.counter }}"></button>
+                                        {% endfor %}
                                     </div>
-                                {% endfor %}
-                            </div>
-                            <button class="carousel-control-prev" type="button" data-bs-target="#carousel{{ event.id }}" data-bs-slide="prev">
-                                <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-                            </button>
-                            <button class="carousel-control-next" type="button" data-bs-target="#carousel{{ event.id }}" data-bs-slide="next">
-                                <span class="carousel-control-next-icon" aria-hidden="true"></span>
-                            </button>
-                        </div>
+                                    <!-- Содержимое карусели -->
+                                    <div class="carousel-inner">
+                                        {% for image in event.photos.all %}
+                                        <div class="carousel-item {% if forloop.first %}active{% endif %}">
+                                            <img src="{{ image.photo.url }}" class="d-block w-100 card-img-top" alt="{{ image.title }}">
+                                        </div>
+                                        {% endfor %}
+                                    </div>
+                                    <!-- Контролы карусели -->
+                                    <button class="carousel-control-prev" type="button" data-bs-target="#carousel{{ event.id }}" data-bs-slide="prev">
+                                        <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                                    </button>
+                                    <button class="carousel-control-next" type="button" data-bs-target="#carousel{{ event.id }}" data-bs-slide="next">
+                                        <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                                    </button>
+                                </div>
+                            {% elif event.image %}
+                                <img src="{{ event.image.url }}" class="card-img-top" alt="{{ event.title }}">
+                            {% endif %}
 
-                        <div class="card-body d-flex flex-column">
-                            <h5 class="card-title">{{ event.title }}</h5>
-                            <p class="card-text">{{ event.description|truncatewords:15 }}</p>
-                            <!-- Кнопки действий -->
-                            <div class="mt-auto align-self-end">
-                                <div class="btn-group dropup">
-                                    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#fullDescriptionModal{{ event.id }}">
-                                        Подробнее
-                                    </button>
-                                    <button type="button" class="btn btn-danger dropdown-toggle dropdown-toggle-split" data-bs-toggle="dropdown" aria-expanded="false">
-                                        <span class="visually-hidden">Переключатель выпадающего списка</span>
-                                    </button>
-                                    <ul class="dropdown-menu">
-                                        <li><a class="dropdown-item" href="{% url 'event_detail' event.id %}">Посмотреть фотографии</a></li>
-                                        <li><a class="dropdown-item" href="{% url 'add_review' event.id %}">Оставить отзыв</a></li>
-                                        <li><a class="dropdown-item" href="#">Что-то еще здесь</a></li>
-                                        <li><hr class="dropdown-divider"></li>
-                                        <li><a class="dropdown-item" href="#">Скачать протокол</a></li>
-                                    </ul>
+                            <div class="card-body d-flex flex-column">
+                                <h5 class="card-title">{{ event.title }}</h5>
+                                     <!-- Отображение резюме или описания -->
+                                <p class="card-text">
+                                    {% if event.summary %}
+                                        {{ event.summary.text|truncatewords:20 }}
+                                    {% else %}
+                                        {{ event.description|truncatewords:20 }}
+                                    {% endif %}
+                                </p>
+                                <!-- Кнопки действий -->
+                                <div class="mt-auto align-self-end">
+                                    <div class="btn-group dropup">
+                                        <a href="{{ event.get_absolute_url }}" class="btn btn-primary">Подробнее</a>
+                                        <button type="button" class="btn btn-danger dropdown-toggle dropdown-toggle-split" data-bs-toggle="dropdown" aria-expanded="false">
+                                            <span class="visually-hidden">Переключатель выпадающего списка</span>
+                                        </button>
+                                        <ul class="dropdown-menu">
+                                            <li><a class="dropdown-item" href="{% url 'add_review' event.id %}">Оставить отзыв</a></li>
+                                            <li><hr class="dropdown-divider"></li>
+                                            <li><a class="dropdown-item" href="#">Скачать протокол</a></li>
+                                        </ul>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </div>
-
-                    <!-- Модальное окно для полного описания мероприятия -->
-                    <div class="modal fade" id="fullDescriptionModal{{ event.id }}" tabindex="-1" aria-labelledby="fullDescriptionModalLabel" aria-hidden="true">
-                        <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
-                            <div class="modal-content">
-                                <div class="modal-header">
-                                    <h5 class="modal-title" id="fullDescriptionModalLabel">{{ event.title }}</h5>
-                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                </div>
-                                <div class="modal-body">
-                                    {{ event.description }}
-                                </div>
-                                <div class="modal-footer">
-                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            {% endfor %}
+                {% endfor %}
+            </div>
         </div>
-    </div>
-</section>
+    </section>
 {% endblock %}

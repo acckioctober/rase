@@ -20,13 +20,31 @@ from race_project import settings
 logger = logging.getLogger(__name__)
 
 
-
 def payment_docs_file_path(instance, filename):
     """Generate file path for new payment document."""
+    event_slug = str(instance.event.slug).replace('-', '_')
     ext = os.path.splitext(filename)[1]
     filename = f'{uuid.uuid4()}{ext}'
 
-    return os.path.join('uploads', 'payment_docs', filename)
+    return os.path.join('uploads', 'payment_docs', event_slug, filename)
+
+
+def event_image_file_path(instance, filename):
+    """Generate file path for event image using the event slug and original filename."""
+    event_slug = str(instance.slug).replace('-', '_')
+    return os.path.join('events', 'image', event_slug, filename)
+
+
+def event_protocol_file_path(instance, filename):
+    """Generate file path for event protocol using the event slug and original filename."""
+    event_slug = str(instance.event.slug).replace('-', '_')
+    return os.path.join('events', 'protocol', event_slug, filename)
+
+
+def event_photos_file_path(instance, filename):
+    """Generate file path for event photos using the event slug and original filename."""
+    event_slug = str(instance.event.slug).replace('-', '_')
+    return os.path.join('events', 'photos', event_slug, filename)
 
 
 class RaceType(models.Model):
@@ -109,12 +127,11 @@ class Event(models.Model):
     description = models.TextField(verbose_name="Описание мероприятия")
     event_rules = models.TextField(verbose_name="Условия участия")
     event_type = models.CharField(max_length=50, choices=EVENT_TYPES, verbose_name="Тип мероприятия")
-    date = models.DateField(verbose_name="Дата мероприятия")
-    time = models.TimeField(verbose_name="Время начала мероприятия")
+    start_datetime = models.DateTimeField(verbose_name="Начало мероприятия", db_index=True)
     location = models.ForeignKey(Location, on_delete=models.CASCADE, verbose_name="Место проведения мероприятия")
     total_slots = models.PositiveIntegerField(verbose_name="Всего мест")
     is_upcoming = models.BooleanField(default=True, verbose_name="Предстоящее мероприятие")
-    image = models.ImageField(upload_to='events/', verbose_name="Изображение для мероприятия")
+    image = models.ImageField(upload_to=event_image_file_path, verbose_name="Изображение для мероприятия")
     race_types = models.ManyToManyField(RaceType, verbose_name="Участвующие группы")
 
     def get_absolute_url(self):
@@ -127,7 +144,7 @@ class Event(models.Model):
 
     def days_left(self):
         """Return days left for the event."""
-        delta = self.date - timezone.now().date()
+        delta = self.start_datetime.date() - timezone.now().date()
         return delta.days
 
     def get_free_slots(self):
@@ -147,16 +164,16 @@ class EventRegistration(models.Model):
     """Model representing a user's registration for a race."""
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE,
                              verbose_name="Пользователь", related_name="registrations")
-    event = models.ForeignKey(Event, on_delete=models.CASCADE, verbose_name="Мероприятие")  # Новое поле для связи с мероприятием
+    event = models.ForeignKey(Event, on_delete=models.CASCADE, verbose_name="Мероприятие")
     race = models.ForeignKey(RaceType, on_delete=models.CASCADE, verbose_name="Участвующие группы")
-    payment_document = models.FileField(upload_to=payment_docs_file_path, verbose_name="Документ об оплате")  # Document in binary format
+    payment_document = models.FileField(upload_to=payment_docs_file_path, verbose_name="Документ об оплате")
     date_of_birth = models.DateField(verbose_name="Дата рождения")
     city = models.CharField(max_length=255, verbose_name="Город")
     club = models.CharField(max_length=255, blank=True, null=True, verbose_name="Клуб")
     tshirt_size = models.CharField(max_length=3, choices=[('S', 'Small'), ('M', 'Medium'), ('L', 'Large')], verbose_name="Размер футболки")
     payment_confirmation = models.BooleanField(default=False, verbose_name="Подтверждение оплаты")
     registered_at = models.DateTimeField(auto_now_add=True, verbose_name="Дата регистрации")
-    is_active = models.BooleanField(default=True, verbose_name="Активная регистрация")  # Field for tracking active registration
+    is_active = models.BooleanField(default=True, verbose_name="Активная регистрация")
 
     def __str__(self):
         return f"Регистрация {self.user} на {self.race} в мероприятии {self.event}"
@@ -164,30 +181,6 @@ class EventRegistration(models.Model):
     class Meta:
         verbose_name = "Регистрация на забег"
         verbose_name_plural = "Регистрация на забеги"
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 class EventSchedule(models.Model):
@@ -219,36 +212,39 @@ class Organizer(models.Model):
         verbose_name_plural = "Организаторы"
 
 
-class GalleryImage(models.Model):
-    event = models.ForeignKey(
-        Event,
-        on_delete=models.CASCADE,
-        related_name='images',
-        verbose_name='Событие'
-    )
-    image = models.ImageField(
-        upload_to='gallery_images/',
-        verbose_name='Изображение'
-    )
-    title = models.CharField(
-        max_length=200,
-        verbose_name='Заголовок'
-    )
-    description = models.TextField(
-        blank=True,
-        verbose_name='Описание'
-    )
-    uploaded_at = models.DateTimeField(
-        auto_now_add=True,
-        verbose_name='Дата загрузки'
-    )
+class EventSummary(models.Model):
+    """
+    The EventSummary class represents a summary and protocol for a specific event.
+    """
+    event = models.OneToOneField(Event, on_delete=models.CASCADE, related_name='summary', verbose_name="Мероприятие")
+    text = models.TextField(blank=True, null=True, verbose_name="Резюме мероприятия")
+    file = models.FileField(upload_to=event_protocol_file_path, verbose_name="Протокол мероприятия")
+    uploaded_at = models.DateTimeField(auto_now_add=True, verbose_name='Дата загрузки')
 
     def __str__(self):
-        return self.title
+        return f"Резюме для мероприятия {self.event.title}"
 
     class Meta:
-        verbose_name = 'Изображение галереи'
-        verbose_name_plural = 'Изображения галереи'
+        verbose_name = 'Резюме для мероприятия'
+        verbose_name_plural = 'Резюме для мероприятий'
+
+
+class GalleryPhoto(models.Model):
+    """
+    The GalleryPhoto class links photos to specific events, featuring optional titles, photo uploads,
+    and auto-recorded upload timestamps.
+    """
+    event = models.ForeignKey(Event, on_delete=models.CASCADE, related_name='photos', verbose_name="Мероприятие")
+    title = models.CharField(max_length=255, blank=True, null=True, verbose_name='Заголовок')
+    photo = models.ImageField(upload_to=event_photos_file_path, verbose_name='Фотография')
+    uploaded_at = models.DateTimeField(auto_now_add=True, verbose_name='Дата загрузки')
+
+    def __str__(self):
+        return f"Изображение для галереи {self.event.title}"
+
+    class Meta:
+        verbose_name = 'Изображение для галереи'
+        verbose_name_plural = 'Изображения для галереи'
 
 
 class Review(models.Model):
@@ -263,4 +259,3 @@ class Review(models.Model):
     class Meta:
         verbose_name = "Отзыв"
         verbose_name_plural = "Отзывы"
-

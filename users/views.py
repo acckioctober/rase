@@ -75,17 +75,13 @@ class RegistrationDetailView(LoginRequiredMixin, DetailView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['now'] = timezone.now().date()  # Добавление текущего времени в контекст
+        context['now'] = timezone.now()  # Добавление текущего времени в контекст
         return context
-
-
-
-
 
 
 class ToggleRegistrationStatusView(LoginRequiredMixin, View):
     def post(self, request, pk):
-        registration = get_object_or_404(EventRegistration, pk=pk, user=request.user, event__date__gt=timezone.now())
+        registration = get_object_or_404(EventRegistration, pk=pk, user=request.user, event__start_datetime__gte=timezone.now())
 
         if registration:
             registration.is_active = not registration.is_active
