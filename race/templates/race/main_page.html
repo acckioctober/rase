@@ -126,7 +126,7 @@
         <div class="container">
             <h2 class="text-center mb-4">Галерея прошедших мероприятий</h2>
             <div class="row">
-                {% for event in past_events|slice:":3" %}
+                {% for event in past_events %}
                     <div class="col-md-4 mb-3">
                         <div class="card h-100">
                             {% if event.photos.exists %}

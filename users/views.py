@@ -14,6 +14,8 @@ from race_project import settings
 from .forms import LoginUserForm, RegisterUserForm, ProfileUserForm, UserPasswordChangeForm
 from race.models import EventRegistration
 
+from django_email_verification import send_email
+
 
 class LoginUser(LoginView):
     form_class = LoginUserForm
@@ -21,11 +23,29 @@ class LoginUser(LoginView):
     extra_context = {'title': 'Авторизация'}
 
 
+# class RegisterUser(CreateView):
+#     form_class = RegisterUserForm
+#     template_name = 'users/register.html'
+#     extra_context = {'title': "Регистрация"}
+#     success_url = reverse_lazy('users:login')
+
 class RegisterUser(CreateView):
     form_class = RegisterUserForm
     template_name = 'users/register.html'
     extra_context = {'title': "Регистрация"}
-    success_url = reverse_lazy('users:login')
+    success_url = reverse_lazy('users:email_verification_sent')  # URL-адрес для перенаправления после регистрации
+
+    def form_valid(self, form):
+        # Создаем пользователя, но пока не сохраняем в базу данных
+        user = form.save(commit=False)
+        # Устанавливаем пользователя как неактивного
+        user.is_active = False
+        # Сохраняем пользователя
+        user.save()
+        # Отправляем email для верификации
+        send_email(user)
+        # Вызываем родительский метод form_valid
+        return super().form_valid(form)
 
 
 class ProfileUser(LoginRequiredMixin, UpdateView):

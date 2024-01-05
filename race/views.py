@@ -27,16 +27,29 @@ class MainPageView(TemplateView):
         context = super().get_context_data(**kwargs)
         current_datetime = timezone.now()
 
-        # Получение предстоящих и прошедших мероприятий
+        # Получение предстоящих мероприятий
         context['upcoming_events'] = Event.objects.filter(
-            start_datetime__gte=current_datetime).order_by('start_datetime')
-        context['past_events'] = Event.objects.filter(
-            start_datetime__lt=current_datetime).order_by('-start_datetime')
+                        start_datetime__gte=current_datetime).order_by('start_datetime')[:3]
 
-        # Получение последних 5 отзывов
-        context['latest_reviews'] = Review.objects.order_by('-created_at')[:5]
+        # Получение прошедших мероприятий с предварительной выборкой связанных данных
+        context['past_events'] = Event.objects.filter(
+            start_datetime__lt=current_datetime
+        ).prefetch_related(
+            'photos', 'summary'
+        ).order_by('-start_datetime')[:3]
+
+        # Получение последних 5 отзывов с выборкой связанных данных
+        context['latest_reviews'] = Review.objects.order_by('-created_at')[:5].select_related(
+            'event', 'author'
+        )
 
         return context
+
+
+
+
+
+
 
 
 class EventsView(ListView):
