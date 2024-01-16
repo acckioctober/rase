@@ -38,11 +38,11 @@ class RaceTypeAdmin(admin.ModelAdmin):
 
 
 class EventRegistrationAdmin(admin.ModelAdmin):
-    list_display = ['user', 'event', 'race', 'city',
+    list_display = ['event', 'race', 'get_user_name', 'get_user_date_birth', 'phone_number', 'city',
                     'club', 'tshirt_size', 'payment_document_link',
                     'payment_confirmation', 'registered_at', 'is_active']
 
-    list_filter = ['payment_confirmation', 'registered_at', 'is_active']
+    list_filter = ['event', 'payment_confirmation', 'registered_at', 'is_active']
 
     actions = ['export_active_to_csv']
 
@@ -55,10 +55,11 @@ class EventRegistrationAdmin(admin.ModelAdmin):
 
         # Заголовки столбцов
         writer.writerow([
-            smart_str(u"User"),
             smart_str(u"Event"),
             smart_str(u"Race"),
+            smart_str(u"User"),
             smart_str(u"Date of Birth"),
+            smart_str(u"Phone Number"),
             smart_str(u"City"),
             smart_str(u"Club"),
             smart_str(u"T-Shirt Size"),
@@ -68,11 +69,16 @@ class EventRegistrationAdmin(admin.ModelAdmin):
 
         # Данные строк
         for registration in queryset.filter(is_active=True):
+            full_name = registration.user.get_full_name() or registration.user.username
+            date_of_birth = registration.user.date_birth.strftime(
+                "%Y-%m-%d") if registration.user.date_birth else "Не указано"
+
             writer.writerow([
-                smart_str(registration.user.username),
                 smart_str(registration.event.title),
                 smart_str(registration.race),
-                smart_str(registration.date_of_birth.strftime("%Y-%m-%d")),
+                smart_str(full_name),
+                smart_str(date_of_birth),
+                smart_str(registration.phone_number),
                 smart_str(registration.city),
                 smart_str(registration.club),
                 smart_str(registration.tshirt_size),
@@ -86,10 +92,27 @@ class EventRegistrationAdmin(admin.ModelAdmin):
 
     def payment_document_link(self, obj):
         if obj.payment_document:
-            return format_html("<a href='{}'>Скачать</a>", obj.payment_document.url)
+            return format_html('<a href="{}" target="_blank">Посмотреть докумен</a>', obj.payment_document.url)
         return "Нет документа"
 
     payment_document_link.short_description = 'Документ об оплате'
+
+    def get_user_name(self, obj):
+        """
+        Returns the user's last name and first name, if they are set,
+         otherwise returns its login.
+        """
+        user = obj.user
+        if user.first_name and user.last_name:
+            return f"{user.last_name} {user.first_name}"
+        else:
+            return user.username
+
+    get_user_name.short_description = 'Пользователь'
+
+    def get_user_date_birth(self, obj):
+        return obj.user.date_birth
+    get_user_date_birth.short_description = 'Дата рождения'
 
 
 class EventAdmin(admin.ModelAdmin):
