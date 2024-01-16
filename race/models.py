@@ -16,6 +16,7 @@ import logging
 from django.utils.text import slugify
 
 from race_project import settings
+from phonenumber_field.modelfields import PhoneNumberField
 
 logger = logging.getLogger(__name__)
 
@@ -160,6 +161,29 @@ class Event(models.Model):
         verbose_name_plural = "Мероприятия"
 
 
+# class EventRegistration(models.Model):
+#     """Model representing a user's registration for a race."""
+#     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE,
+#                              verbose_name="Пользователь", related_name="registrations")
+#     event = models.ForeignKey(Event, on_delete=models.CASCADE, verbose_name="Мероприятие")
+#     race = models.ForeignKey(RaceType, on_delete=models.CASCADE, verbose_name="Участвующие группы")
+#     payment_document = models.FileField(upload_to=payment_docs_file_path, verbose_name="Документ об оплате")
+#     date_of_birth = models.DateField(verbose_name="Дата рождения")
+#     city = models.CharField(max_length=255, verbose_name="Город")
+#     club = models.CharField(max_length=255, blank=True, null=True, verbose_name="Клуб")
+#     tshirt_size = models.CharField(max_length=3, choices=[('S', 'Small'), ('M', 'Medium'), ('L', 'Large')], verbose_name="Размер футболки")
+#     payment_confirmation = models.BooleanField(default=False, verbose_name="Подтверждение оплаты")
+#     registered_at = models.DateTimeField(auto_now_add=True, verbose_name="Дата регистрации")
+#     is_active = models.BooleanField(default=True, verbose_name="Активная регистрация")
+#
+#     def __str__(self):
+#         return f"Регистрация {self.user} на {self.race} в мероприятии {self.event}"
+#
+#     class Meta:
+#         verbose_name = "Регистрация на забег"
+#         verbose_name_plural = "Регистрации на забеги"
+
+
 class EventRegistration(models.Model):
     """Model representing a user's registration for a race."""
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE,
@@ -167,7 +191,7 @@ class EventRegistration(models.Model):
     event = models.ForeignKey(Event, on_delete=models.CASCADE, verbose_name="Мероприятие")
     race = models.ForeignKey(RaceType, on_delete=models.CASCADE, verbose_name="Участвующие группы")
     payment_document = models.FileField(upload_to=payment_docs_file_path, verbose_name="Документ об оплате")
-    date_of_birth = models.DateField(verbose_name="Дата рождения")
+    phone_number = PhoneNumberField(blank=True, null=True, verbose_name="Номер телефона")
     city = models.CharField(max_length=255, verbose_name="Город")
     club = models.CharField(max_length=255, blank=True, null=True, verbose_name="Клуб")
     tshirt_size = models.CharField(max_length=3, choices=[('S', 'Small'), ('M', 'Medium'), ('L', 'Large')], verbose_name="Размер футболки")
@@ -180,7 +204,9 @@ class EventRegistration(models.Model):
 
     class Meta:
         verbose_name = "Регистрация на забег"
-        verbose_name_plural = "Регистрация на забеги"
+        verbose_name_plural = "Регистрации на забеги"
+
+
 
 
 class EventSchedule(models.Model):

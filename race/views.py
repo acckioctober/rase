@@ -46,12 +46,6 @@ class MainPageView(TemplateView):
         return context
 
 
-
-
-
-
-
-
 class EventsView(ListView):
     """
     The EventsView class is responsible for displaying a list of events on the 'race/events.html' page.
@@ -125,7 +119,9 @@ class EventDetailView(DetailView):
 
 
 class EventRegistrationsView(DetailView):
-    """A view for display details of registrations."""
+    """
+    A view for display details of registrations.
+    """
     model = Event
     template_name = 'race/event_registrations.html'
     context_object_name = 'event'
@@ -148,18 +144,29 @@ class EventRegistrationsView(DetailView):
 
 
 def get_races_for_event(request, event_id):
-    """A Django view function that retrieves and returns all race types
-    associated with a specific event as JSON."""
+    """
+    A Django view function that retrieves and returns all race types
+    associated with a specific event as JSON, ensuring the event is still upcoming.
+    """
     event = get_object_or_404(Event, id=event_id)
-    races = event.race_types.all()
-    data = {
-        'races': [{'id': race.id, 'name': str(race)} for race in races]
-    }
+
+    # Проверяем, что событие еще не истекло
+    if event.start_datetime >= timezone.now():
+        races = event.race_types.all()
+        data = {
+            'races': [{'id': race.id, 'name': str(race)} for race in races]
+        }
+    else:
+        # Если событие истекло, возвращаем пустой список
+        data = {'races': []}
+
     return JsonResponse(data)
 
 
 class EventRegistrationCreateView(LoginRequiredMixin, CreateView):
-    """A view for creating new event registrations."""
+    """
+    A view for creating new event registrations.
+    """
     model = EventRegistration
     form_class = EventRegistrationForm
     template_name = 'race/register_for_event.html'
@@ -179,7 +186,9 @@ class EventRegistrationCreateView(LoginRequiredMixin, CreateView):
 
 
 class RaceRegistrationSuccessView(TemplateView):
-    """A view for displaying a success page after a user has successfully registered for a race."""
+    """
+    A view for displaying a success page after a user has successfully registered for a race.
+    """
     template_name = 'race/race_registration_success.html'
 
     def dispatch(self, request, *args, **kwargs):

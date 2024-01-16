@@ -1,0 +1,13 @@
+{% extends 'users/user_menu.html' %}
+
+{% block user_content %}
+<div class="container bg-white shadow  p-5">
+    <h5>Вы уверены, что хотите удалить свой аккаунт?</h5>
+    <br>
+    <form method="post">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-danger btn-block p-2">Удалить аккаунт</button>
+    </form>
+</div>
+{% endblock user_content %}
+

@@ -16,18 +16,24 @@ class LoginUserForm(AuthenticationForm):
 
 
 class RegisterUserForm(UserCreationForm):
-    """Form class used for user registration"""
+    """
+    Form class used for user registration.
+    """
     username = forms.CharField(label="Логин", widget=forms.TextInput(attrs={'class': 'form-input'}))
     password1 = forms.CharField(label="Пароль", widget=forms.PasswordInput(attrs={'class': 'form-input'}))
     password2 = forms.CharField(label="Повтор пароля", widget=forms.PasswordInput(attrs={'class': 'form-input'}))
+    date_birth = forms.DateField(
+        widget=forms.widgets.DateInput(attrs={'placeholder': '20.01.1979'}),
+        label='Дата рождения'
+    )
 
     class Meta:
         model = get_user_model()
-        fields = ['username', 'email', 'first_name', 'last_name', 'password1', 'password2']
+        fields = ['username', 'email', 'first_name', 'last_name', 'date_birth', 'password1', 'password2']
         labels = {
             'email': 'E-mail',
-            'first_name': "Имя",
-            'last_name': "Фамилия",
+            'first_name': 'Имя',
+            'last_name': 'Фамилия',
         }
         widgets = {
             'email': forms.TextInput(attrs={'class': 'form-input'}),

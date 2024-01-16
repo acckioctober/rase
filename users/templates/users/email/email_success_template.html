@@ -20,14 +20,14 @@
     {% if success %}
 
         <div class="alert alert-success" role="alert">
-            <h4 class="alert-heading">Электронная почта подтверждена</h4>
-            <p>Ваш адрес электронной почты успешно подтвержден. Спасибо за регистрацию!</p>
-            <p>You will be redirected to the home page in <span  id="timer"></span> seconds</p>
+            <h4 class="alert-heading">Электронная почта подтверждена, cпасибо за регистрацию!</h4>
+            <p>Для входа в систему необходимо авторизоваться.</p>
+            <p>Вы будете перенаправлены на страницу авторизации через <span  id="timer"></span> секунд.</p>
         </div>
 
     {% else %}
     <div class="alert alert-danger" role="alert">
-        <h4 class="alert-heading">Ошибка подтверждения по электронной почте</h4>
+        <h4 class="alert-heading">Ошибка подтверждения по электронной почте!</h4>
         <p>Ссылка для подтверждения по электронной почте недействительна или срок ее действия истек. Пожалуйста, зарегистрируйтесь снова.</p>
     </div>
     {% endif %}
@@ -57,7 +57,7 @@
 
             // If the timer value reaches 0, stop the timer
             if (timerValue === 0) {
-                window.location.href = '/';
+                window.location.href = '/users/login/';
             }
         }, 1000);
     });

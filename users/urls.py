@@ -58,4 +58,7 @@ urlpatterns = [
 
     path('registration/toggle-status/<int:pk>/', views.ToggleRegistrationStatusView.as_view(),
          name='registration_toggle_status'),
+
+    path('delete-profile/', views.DeleteProfileView.as_view(),
+         name='delete_profile'),
 ]

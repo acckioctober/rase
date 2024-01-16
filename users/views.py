@@ -4,7 +4,7 @@ from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.views import LoginView, PasswordChangeView, LogoutView
 from django.http import HttpResponse, HttpResponseRedirect
-from django.shortcuts import render, get_object_or_404
+from django.shortcuts import render, get_object_or_404, redirect
 from django.urls import reverse, reverse_lazy
 from django.utils import timezone
 from django.views import View
@@ -112,3 +112,17 @@ class ToggleRegistrationStatusView(LoginRequiredMixin, View):
             messages.error(request, "Не удалось изменить статус регистрации.")
 
         return HttpResponseRedirect(reverse_lazy('users:registration_detail', kwargs={'pk': pk}))
+
+
+class DeleteProfileView(LoginRequiredMixin, View):
+    template_name = 'users/delete_profile.html'
+    success_url = reverse_lazy('main_page')  # URL для перенаправления после удаления
+
+    def get(self, request, *args, **kwargs):
+        return render(request, self.template_name)
+
+    def post(self, request, *args, **kwargs):
+        user = request.user
+        user.delete()
+        messages.success(request, 'Ваш аккаунт успешно удален.')
+        return redirect(self.success_url)

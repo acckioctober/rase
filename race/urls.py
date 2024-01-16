@@ -14,9 +14,10 @@ urlpatterns = [
 
     path('events/<int:pk>/add_review/', views.add_review, name='add_review'),
 
-
-
     path('register-for-event/', views.EventRegistrationCreateView.as_view(), name='register_for_event'),
     path('race-registration-success/', views.RaceRegistrationSuccessView.as_view(), name='race_registration_success'),
+
+
+    # path('register-for-event/', views.register_for_event, name='register_for_event'),
 
 ]
